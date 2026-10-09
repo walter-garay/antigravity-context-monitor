@@ -135,6 +135,23 @@ function renderData(data) {
   progressBar.style.width = `${Math.max(percent, 2)}%`;
   progressBar.style.backgroundColor = getProgressColor(data.statusLevel);
 
+  // Update checkpoints scale active highlight
+  ['cp-optimal', 'cp-moderate', 'cp-heavy', 'cp-critical'].forEach(id => {
+    const el = $(id);
+    if (el) el.classList.remove('active');
+  });
+
+  let activeCheckpointId = 'cp-optimal';
+  if (percent >= 80) {
+    activeCheckpointId = 'cp-critical';
+  } else if (percent >= 55) {
+    activeCheckpointId = 'cp-heavy';
+  } else if (percent >= 25) {
+    activeCheckpointId = 'cp-moderate';
+  }
+  const activeCpEl = $(activeCheckpointId);
+  if (activeCpEl) activeCpEl.classList.add('active');
+
   // Model tag
   $('model-tag').textContent = data.detectedModel || 'Gemini Flash';
 

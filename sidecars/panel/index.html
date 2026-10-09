@@ -44,27 +44,36 @@
         <span class="tokens-suffix">tokens</span>
       </div>
 
-      <div class="progress-track-wrap">
-        <div class="progress-track" title="Rangos: &lt;25% Óptimo | 25-55% Moderado | 55-80% Pesado | &gt;80% Crítico">
+      <div class="progress-wrap">
+        <div class="progress-track">
           <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
-          <span class="track-cp cp-25" title="Moderado (25%)"></span>
-          <span class="track-cp cp-55" title="Pesado (55%)"></span>
-          <span class="track-cp cp-80" title="Crítico (80%)"></span>
+          <div class="track-tick tick-25" title="Checkpoint 25% (Moderado)"></div>
+          <div class="track-tick tick-55" title="Checkpoint 55% (Pesado)"></div>
+          <div class="track-tick tick-80" title="Checkpoint 80% (Crítico)"></div>
         </div>
-        <div class="track-scale">
-          <span class="scale-mark" style="left: 0%;">0%</span>
-          <span class="scale-mark mark-mod" style="left: 25%;">25%</span>
-          <span class="scale-mark mark-hvy" style="left: 55%;">55%</span>
-          <span class="scale-mark mark-crit" style="left: 80%;">80%</span>
-          <span class="scale-mark" style="right: 0%; left: auto;">100%</span>
-        </div>
-      </div>
 
-      <div class="semaforo-ranges">
-        <span class="range-tag"><span class="range-dot dot-green"></span>&lt;25% Óptimo</span>
-        <span class="range-tag"><span class="range-dot dot-yellow"></span>25-55% Mod.</span>
-        <span class="range-tag"><span class="range-dot dot-orange"></span>55-80% Pes.</span>
-        <span class="range-tag"><span class="range-dot dot-red"></span>&gt;80% Crít.</span>
+        <div class="checkpoints-scale">
+          <div class="cp-zone cp-optimal" id="cp-optimal" title="0% - 25%: Óptimo">
+            <span class="cp-dot optimal"></span>
+            <span class="cp-label">Óptimo</span>
+            <span class="cp-thresh">&lt;25%</span>
+          </div>
+          <div class="cp-zone cp-moderate" id="cp-moderate" title="25% - 55%: Moderado">
+            <span class="cp-dot moderate"></span>
+            <span class="cp-label">Normal</span>
+            <span class="cp-thresh">25%</span>
+          </div>
+          <div class="cp-zone cp-heavy" id="cp-heavy" title="55% - 80%: Pesado">
+            <span class="cp-dot heavy"></span>
+            <span class="cp-label">Pesado</span>
+            <span class="cp-thresh">55%</span>
+          </div>
+          <div class="cp-zone cp-critical" id="cp-critical" title="> 80%: Crítico">
+            <span class="cp-dot critical"></span>
+            <span class="cp-label">Crítico</span>
+            <span class="cp-thresh">80%</span>
+          </div>
+        </div>
       </div>
 
       <div class="progress-footer">
