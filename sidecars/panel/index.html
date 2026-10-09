@@ -11,122 +11,129 @@
   <div class="panel-container">
     <!-- Header -->
     <header class="panel-header">
-      <div class="header-title">
+      <div class="header-brand">
         <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="9"/>
-          <path d="M12 7v5l3 3"/>
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
         </svg>
-        <h1>Context Monitor</h1>
+        <span class="header-title">Context Monitor</span>
       </div>
-      <div class="header-actions">
-        <span id="live-indicator" class="live-pill active">En vivo</span>
-        <button id="btn-refresh" class="icon-btn" title="Actualizar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+      <div class="header-controls">
+        <span id="live-indicator" class="live-pill">En vivo</span>
+        <button id="btn-refresh" class="icon-btn" title="Actualizar métricas" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8m0 0V3m0 5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16m0 0v5m0-5h-5"/>
           </svg>
         </button>
       </div>
     </header>
 
-    <!-- Main Gauge Card -->
-    <section class="card gauge-card">
-      <div class="gauge-header">
-        <span class="card-subtitle">Ventana de Contexto</span>
+    <!-- Main Gauge Section -->
+    <section class="card main-card">
+      <div class="card-meta">
+        <span class="label-uppercase">Ventana de Contexto</span>
         <span id="model-tag" class="model-badge">Gemini Flash</span>
       </div>
 
-      <div class="token-display">
-        <span id="tokens-current" class="token-number">--</span>
-        <span class="token-separator">/</span>
-        <span id="tokens-max" class="token-max">--</span>
-        <span class="token-unit">tokens</span>
+      <div class="token-hero">
+        <div class="token-value-group">
+          <span id="tokens-current" class="tokens-big">--</span>
+          <span class="tokens-slash">/</span>
+          <span id="tokens-max" class="tokens-limit">--</span>
+        </div>
+        <span class="tokens-suffix">tokens</span>
       </div>
 
-      <!-- Visual Progress Bar -->
-      <div class="progress-bar-container">
-        <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+      <div class="progress-track">
+        <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
       </div>
 
-      <div class="progress-labels">
-        <span id="percent-label" class="percent-text">0% utilizado</span>
-        <span id="tokens-remaining" class="remaining-text">-- disponibles</span>
+      <div class="progress-footer">
+        <span id="percent-label" class="percent-highlight">0% usado</span>
+        <span id="tokens-remaining" class="tokens-left">-- disponibles</span>
       </div>
     </section>
 
-    <!-- Status & Recommendation Card -->
-    <section id="status-card" class="card status-card optimal">
-      <div class="status-header">
-        <span id="status-badge-dot" class="status-badge-dot"></span>
-        <h3 id="status-title">Calculando estado...</h3>
+    <!-- Diagnostic Banner -->
+    <section id="status-card" class="diagnostic-card optimal">
+      <div class="diagnostic-headline">
+        <span id="status-icon-wrap" class="status-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+          </svg>
+        </span>
+        <span id="status-title" class="diagnostic-title">Calculando estado...</span>
       </div>
-      <p id="status-message" class="status-desc">Analizando el historial de la conversación...</p>
-      <div id="recommendation-box" class="recommendation-box">
-        <strong>💡 Recomendación:</strong>
-        <span id="recommendation-text">--</span>
-      </div>
-    </section>
-
-    <!-- Detailed Stats Grid -->
-    <section class="stats-grid">
-      <div class="stat-box">
-        <span class="stat-label">Caché Leída</span>
-        <span id="stat-cache" class="stat-value">--</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Tokens Salida</span>
-        <span id="stat-output" class="stat-value">--</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Turnos / Pasos</span>
-        <span id="stat-turns" class="stat-value">--</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Herramientas</span>
-        <span id="stat-tools" class="stat-value">--</span>
-      </div>
-    </section>
-
-    <!-- Actions -->
-    <section class="actions-section">
-      <button id="btn-copy-summary" class="btn btn-secondary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      <p id="status-message" class="diagnostic-sub">Analizando historial del chat...</p>
+      
+      <div class="recommendation-pill">
+        <svg class="recom-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+          <path d="M9 18h6m-4 3h2m-5-8a6 6 0 1 1 8 0c-.8 1-1.5 2-1.5 3h-5c0-1-.7-2-1.5-3z"/>
         </svg>
-        Copiar resumen de contexto
-      </button>
-      <button id="btn-new-chat" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Iniciar nuevo chat
-      </button>
-    </section>
-
-    <!-- Recent Activity Trail -->
-    <section class="card activity-card">
-      <h3 class="card-title">Última actividad del chat</h3>
-      <div id="events-list" class="events-list">
-        <div class="empty-events">Sin actividad reciente registrada</div>
+        <span id="recommendation-text" class="recom-text">--</span>
       </div>
     </section>
 
-    <!-- Updater bar -->
-    <div class="update-card">
-      <div class="update-info">
-        <span id="version-tag" class="version-tag">v1.0.0</span>
-        <span id="update-msg" class="update-msg">Al día</span>
+    <!-- Metrics 2x2 Grid -->
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <span class="metric-label">Caché Leída</span>
+        <span id="stat-cache" class="metric-num">--</span>
       </div>
-      <div id="update-action-container">
-        <button id="btn-check-update" class="link-btn">Buscar actualización</button>
+      <div class="metric-item">
+        <span class="metric-label">Tokens Salida</span>
+        <span id="stat-output" class="metric-num">--</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Turnos Chat</span>
+        <span id="stat-turns" class="metric-num">--</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Herramientas</span>
+        <span id="stat-tools" class="metric-num">--</span>
       </div>
     </div>
 
-    <!-- Footer info -->
-    <footer class="panel-footer">
-      <span id="last-sync">Actualizado hace un momento</span>
-      <span class="footer-convo-id" id="convo-id-display">ID: --</span>
+    <!-- Actions -->
+    <div class="button-group">
+      <button id="btn-copy-summary" class="action-btn secondary-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+        </svg>
+        <span>Copiar resumen de contexto</span>
+      </button>
+
+      <button id="btn-new-chat" class="action-btn primary-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        <span>Iniciar nuevo chat</span>
+      </button>
+    </div>
+
+    <!-- Recent Activity -->
+    <section class="card activity-section">
+      <div class="activity-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span>Actividad reciente</span>
+      </div>
+      <div id="events-list" class="events-container">
+        <div class="events-empty">Sin actividad reciente</div>
+      </div>
+    </section>
+
+    <!-- Minimal Footer -->
+    <footer class="panel-foot">
+      <div class="foot-left">
+        <span id="version-tag" class="foot-version">v1.0.0</span>
+        <span class="foot-sep">•</span>
+        <button id="btn-check-update" class="foot-link" type="button">Actualizar</button>
+        <span id="update-msg" class="foot-msg"></span>
+      </div>
+      <span id="convo-id-display" class="foot-id">ID: --</span>
     </footer>
   </div>
 

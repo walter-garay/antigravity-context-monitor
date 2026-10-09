@@ -19,7 +19,43 @@ function toast(message, isError = false) {
   el.classList.toggle('error', isError);
   el.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.hidden = true; }, 3000);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
+}
+
+// Copy to clipboard with robust iframe fallback
+function copyToClipboard(text) {
+  return new Promise((resolve, reject) => {
+    // Method 1: document.execCommand with temporary textarea
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.setAttribute('readonly', '');
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '-9999px';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const success = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (success) {
+        resolve();
+        return;
+      }
+    } catch {
+      // Fall through to navigator.clipboard
+    }
+
+    // Method 2: navigator.clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(resolve).catch(reject);
+      return;
+    }
+
+    reject(new Error('Portapapeles no soportado en este entorno'));
+  });
 }
 
 async function callApi(path, { method = 'GET', body } = {}) {
@@ -36,12 +72,28 @@ async function callApi(path, { method = 'GET', body } = {}) {
 
 function getProgressColor(statusLevel) {
   switch (statusLevel) {
-    case 'optimal': return '#a6e3a1'; // Green
-    case 'moderate': return '#f9e2af'; // Yellow
-    case 'heavy': return '#fab387'; // Orange
-    case 'critical': return '#f38ba8'; // Red
-    case 'compacted': return '#cba6f7'; // Purple
-    default: return '#89b4fa'; // Blue
+    case 'optimal': return '#4ade80'; // Green
+    case 'moderate': return '#facc15'; // Yellow
+    case 'heavy': return '#fb923c'; // Orange
+    case 'critical': return '#f87171'; // Red
+    case 'compacted': return '#c084fc'; // Purple
+    default: return '#38bdf8'; // Blue
+  }
+}
+
+function getStatusIconSvg(statusLevel) {
+  switch (statusLevel) {
+    case 'optimal':
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`;
+    case 'moderate':
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    case 'heavy':
+    case 'critical':
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    case 'compacted':
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+    default:
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="10"/></svg>`;
   }
 }
 
@@ -49,7 +101,7 @@ async function refreshContext() {
   const convoId = sidecar?.conversationId;
   const convoDisplay = $('convo-id-display');
   if (convoDisplay) {
-    convoDisplay.textContent = convoId ? `ID: ${convoId.slice(0, 8)}...` : 'ID: Global';
+    convoDisplay.textContent = convoId ? `ID: ${convoId.slice(0, 8)}...` : 'ID: Activo';
   }
 
   try {
@@ -78,8 +130,8 @@ function renderData(data) {
   // Update Tokens Display
   $('tokens-current').textContent = formatNumber(current);
   $('tokens-max').textContent = formatNumber(max);
-  $('percent-label').textContent = `${percent}% utilizado`;
-  $('tokens-remaining').textContent = `${formatNumber(remaining)} disponibles`;
+  $('percent-label').textContent = `${percent}% usado`;
+  $('tokens-remaining').textContent = `${formatNumber(remaining)} libres`;
 
   // Update Progress Bar
   const progressBar = $('progress-bar');
@@ -94,9 +146,14 @@ function renderData(data) {
     $('version-tag').textContent = `v${data.version}`;
   }
 
-  // Status Card
+  // Status Card & Icon
   const statusCard = $('status-card');
-  statusCard.className = `card status-card ${data.statusLevel || 'optimal'}`;
+  statusCard.className = `diagnostic-card ${data.statusLevel || 'optimal'}`;
+
+  const iconWrap = $('status-icon-wrap');
+  if (iconWrap) {
+    iconWrap.innerHTML = getStatusIconSvg(data.statusLevel);
+  }
 
   const titles = {
     optimal: 'Óptimo (Rendimiento Alto)',
@@ -106,7 +163,7 @@ function renderData(data) {
     compacted: 'Compactado por el Sistema',
   };
 
-  $('status-title').textContent = titles[data.statusLevel] || 'Estado Desconocido';
+  $('status-title').textContent = titles[data.statusLevel] || 'Estado';
   $('status-message').textContent = data.statusMessage || '';
   $('recommendation-text').textContent = data.recommendation || 'Sin recomendaciones.';
 
@@ -129,19 +186,16 @@ function renderData(data) {
 
       item.innerHTML = `
         <div class="event-top">
-          <span class="${typeClass}">Paso #${evt.stepIndex}: ${escapeHtml(evt.label)}</span>
-          <span style="opacity: 0.6; font-size: 10px;">${timeStr}</span>
+          <span class="${typeClass}">#${evt.stepIndex} ${escapeHtml(evt.label)}</span>
+          <span style="opacity: 0.55; font-size: 10px;">${timeStr}</span>
         </div>
         ${evt.detail ? `<div class="event-detail">${escapeHtml(evt.detail)}</div>` : ''}
       `;
       eventsContainer.appendChild(item);
     });
   } else {
-    eventsContainer.innerHTML = '<div class="empty-events">Sin actividad reciente registrada</div>';
+    eventsContainer.innerHTML = '<div class="events-empty">Sin actividad reciente</div>';
   }
-
-  // Footer
-  $('last-sync').textContent = `Actualizado: ${new Date().toLocaleTimeString()}`;
 }
 
 function escapeHtml(text) {
@@ -153,12 +207,17 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
-// Actions
+// ---------------------------------------------------------------------------
+// Event Listeners
+// ---------------------------------------------------------------------------
+
+// Refresh button
 $('btn-refresh')?.addEventListener('click', () => {
   refreshContext();
   toast('Métricas actualizadas');
 });
 
+// Copy Summary Button (with iframe fallback)
 $('btn-copy-summary')?.addEventListener('click', async () => {
   if (!lastData) {
     toast('No hay datos disponibles para copiar', true);
@@ -172,58 +231,79 @@ $('btn-copy-summary')?.addEventListener('click', async () => {
 • Recomendación: ${lastData.recommendation}`;
 
   try {
-    await navigator.clipboard.writeText(summaryText);
-    toast('¡Resumen copiado al portapapeles!');
-  } catch {
-    toast('No se pudo acceder al portapapeles', true);
+    await copyToClipboard(summaryText);
+    toast('Copiado al portapapeles');
+  } catch (err) {
+    console.error('Error al copiar:', err);
+    toast('No se pudo copiar automáticamente', true);
   }
 });
 
+// Start New Chat Button
 $('btn-new-chat')?.addEventListener('click', async () => {
-  if (confirm('¿Deseas iniciar una nueva conversación limpia para este workspace?')) {
-    try {
-      if (sidecar?.agent?.startConversation) {
-        await sidecar.agent.startConversation('Hola, iniciamos una nueva sesión de trabajo con el contexto limpio.');
-        toast('Iniciando nuevo chat...');
-      } else {
-        toast('Usa el botón de "+" en la barra lateral izquierda para un nuevo chat');
+  const btn = $('btn-new-chat');
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+      <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"/>
+    </svg>
+    <span>Iniciando nuevo chat...</span>
+  `;
+
+  try {
+    if (sidecar?.agent?.startConversation) {
+      const res = await sidecar.agent.startConversation('Iniciando una nueva sesión de trabajo con el contexto limpio.');
+      const newConvoId = res?.response?.conversationId || res?.conversation_id || res?.conversationId;
+      
+      toast('Nuevo chat creado con éxito');
+
+      if (newConvoId && sidecar?.ui?.toggleConversation) {
+        sidecar.ui.toggleConversation(newConvoId);
       }
-    } catch (err) {
-      toast(`Error: ${err.message}`, true);
+    } else {
+      toast('Crea un nuevo chat usando el botón "+" en la barra izquierda.');
     }
+  } catch (err) {
+    console.error('Error al iniciar conversación:', err);
+    toast(`Error: ${err.message}`, true);
+  } finally {
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }, 1500);
   }
 });
 
 // Update checker
 $('btn-check-update')?.addEventListener('click', async () => {
   const updateMsg = $('update-msg');
-  const actionContainer = $('update-action-container');
-  updateMsg.textContent = 'Buscando...';
+  const btn = $('btn-check-update');
+  updateMsg.textContent = 'Verificando...';
 
   try {
     const res = await callApi('/api/check-update');
     if (res.hasUpdate) {
       updateMsg.textContent = `¡v${res.latestVersion} disponible!`;
-      actionContainer.innerHTML = `<button id="btn-update-now" class="btn-update-now">Actualizar ahora</button>`;
+      btn.textContent = 'Actualizar ahora';
+      btn.style.color = '#4ade80';
 
-      $('btn-update-now')?.addEventListener('click', async () => {
-        toast('Descargando actualización...');
+      btn.onclick = async () => {
+        btn.textContent = 'Descargando...';
         const applyRes = await callApi('/api/apply-update', { method: 'POST' });
         if (applyRes.success) {
-          toast(applyRes.message);
-          updateMsg.textContent = `Actualizado a v${res.latestVersion}`;
-          actionContainer.innerHTML = '<span style="color:var(--success-color);">✓ Al día</span>';
-          setTimeout(() => refreshContext(), 1000);
+          toast('Plugin actualizado. Recargando...');
+          setTimeout(() => window.location.reload(), 1200);
         } else {
           toast(applyRes.message, true);
         }
-      });
+      };
     } else {
-      updateMsg.textContent = 'Versión más reciente instalada';
+      updateMsg.textContent = 'Al día';
       toast('Ya tienes la versión más reciente.');
     }
   } catch (err) {
-    updateMsg.textContent = 'Error al comprobar';
+    updateMsg.textContent = 'Error';
     toast(`Error: ${err.message}`, true);
   }
 });
