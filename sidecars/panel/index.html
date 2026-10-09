@@ -52,27 +52,11 @@
           <div class="track-tick tick-80" title="Checkpoint 80% (Crítico)"></div>
         </div>
 
-        <div class="checkpoints-scale">
-          <div class="cp-zone cp-optimal" id="cp-optimal" title="0% - 25%: Óptimo">
-            <span class="cp-dot optimal"></span>
-            <span class="cp-label">Óptimo</span>
-            <span class="cp-thresh">&lt;25%</span>
-          </div>
-          <div class="cp-zone cp-moderate" id="cp-moderate" title="25% - 55%: Moderado">
-            <span class="cp-dot moderate"></span>
-            <span class="cp-label">Normal</span>
-            <span class="cp-thresh">25%</span>
-          </div>
-          <div class="cp-zone cp-heavy" id="cp-heavy" title="55% - 80%: Pesado">
-            <span class="cp-dot heavy"></span>
-            <span class="cp-label">Pesado</span>
-            <span class="cp-thresh">55%</span>
-          </div>
-          <div class="cp-zone cp-critical" id="cp-critical" title="> 80%: Crítico">
-            <span class="cp-dot critical"></span>
-            <span class="cp-label">Crítico</span>
-            <span class="cp-thresh">80%</span>
-          </div>
+        <!-- Minimal Checkpoint Ruler (Monochromatic & aligned with ticks) -->
+        <div class="track-ruler">
+          <span id="mark-25" class="ruler-tick mark-25" title="Checkpoint 25%: Uso moderado">25%</span>
+          <span id="mark-55" class="ruler-tick mark-55" title="Checkpoint 55%: Chat pesado">55%</span>
+          <span id="mark-80" class="ruler-tick mark-80" title="Checkpoint 80%: Límite recomendado">80%</span>
         </div>
       </div>
 

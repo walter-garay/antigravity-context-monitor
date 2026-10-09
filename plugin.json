@@ -1,6 +1,6 @@
 {
   "name": "context-monitor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Walter Garay",
   "description": "Monitor en tiempo real del uso de la ventana de contexto, tokens y saturación de chat para Google Antigravity Desktop (Antigravity 2.0).",
   "logo": "assets/logo.svg"
