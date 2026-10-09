@@ -170,28 +170,30 @@ function renderData(data) {
   $('stat-turns').textContent = `${data.userPromptCount || 0} / ${data.modelTurnCount || 0}`;
   $('stat-tools').textContent = formatNumber(data.toolCallCount || 0);
 
-  // Recent Events
+  // Recent Events (optional)
   const eventsContainer = $('events-list');
-  if (data.recentEvents && data.recentEvents.length > 0) {
-    eventsContainer.innerHTML = '';
-    data.recentEvents.forEach(evt => {
-      const item = document.createElement('div');
-      item.className = 'event-item';
+  if (eventsContainer) {
+    if (data.recentEvents && data.recentEvents.length > 0) {
+      eventsContainer.innerHTML = '';
+      data.recentEvents.forEach(evt => {
+        const item = document.createElement('div');
+        item.className = 'event-item';
 
-      const typeClass = `event-type-${evt.type || 'model'}`;
-      const timeStr = evt.time ? new Date(evt.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+        const typeClass = `event-type-${evt.type || 'model'}`;
+        const timeStr = evt.time ? new Date(evt.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
 
-      item.innerHTML = `
-        <div class="event-top">
-          <span class="${typeClass}">#${evt.stepIndex} ${escapeHtml(evt.label)}</span>
-          <span style="opacity: 0.55; font-size: 10px;">${timeStr}</span>
-        </div>
-        ${evt.detail ? `<div class="event-detail">${escapeHtml(evt.detail)}</div>` : ''}
-      `;
-      eventsContainer.appendChild(item);
-    });
-  } else {
-    eventsContainer.innerHTML = '<div class="events-empty">Sin actividad reciente</div>';
+        item.innerHTML = `
+          <div class="event-top">
+            <span class="${typeClass}">#${evt.stepIndex} ${escapeHtml(evt.label)}</span>
+            <span style="opacity: 0.55; font-size: 10px;">${timeStr}</span>
+          </div>
+          ${evt.detail ? `<div class="event-detail">${escapeHtml(evt.detail)}</div>` : ''}
+        `;
+        eventsContainer.appendChild(item);
+      });
+    } else {
+      eventsContainer.innerHTML = '<div class="events-empty">Sin actividad reciente</div>';
+    }
   }
 }
 
