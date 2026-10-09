@@ -9,7 +9,7 @@ const PLUGIN_ROOT = join(HERE, '..', '..');
 const APP_DATA_DIR = process.env.ANTIGRAVITY_APP_DATA_DIR || join(homedir(), '.gemini', 'antigravity');
 const BRAIN_DIR = join(APP_DATA_DIR, 'brain');
 
-const CURRENT_VERSION = '1.0.1';
+const CURRENT_VERSION = '1.0.2';
 const GITHUB_REPO = 'walter-garay/antigravity-context-monitor';
 const RAW_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main`;
 

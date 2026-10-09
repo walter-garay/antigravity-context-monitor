@@ -44,8 +44,27 @@
         <span class="tokens-suffix">tokens</span>
       </div>
 
-      <div class="progress-track">
-        <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
+      <div class="progress-track-wrap">
+        <div class="progress-track" title="Rangos: &lt;25% Óptimo | 25-55% Moderado | 55-80% Pesado | &gt;80% Crítico">
+          <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
+          <span class="track-cp cp-25" title="Moderado (25%)"></span>
+          <span class="track-cp cp-55" title="Pesado (55%)"></span>
+          <span class="track-cp cp-80" title="Crítico (80%)"></span>
+        </div>
+        <div class="track-scale">
+          <span class="scale-mark" style="left: 0%;">0%</span>
+          <span class="scale-mark mark-mod" style="left: 25%;">25%</span>
+          <span class="scale-mark mark-hvy" style="left: 55%;">55%</span>
+          <span class="scale-mark mark-crit" style="left: 80%;">80%</span>
+          <span class="scale-mark" style="right: 0%; left: auto;">100%</span>
+        </div>
+      </div>
+
+      <div class="semaforo-ranges">
+        <span class="range-tag"><span class="range-dot dot-green"></span>&lt;25% Óptimo</span>
+        <span class="range-tag"><span class="range-dot dot-yellow"></span>25-55% Mod.</span>
+        <span class="range-tag"><span class="range-dot dot-orange"></span>55-80% Pes.</span>
+        <span class="range-tag"><span class="range-dot dot-red"></span>&gt;80% Crít.</span>
       </div>
 
       <div class="progress-footer">
