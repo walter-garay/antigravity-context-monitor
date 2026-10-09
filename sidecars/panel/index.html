@@ -52,11 +52,20 @@
           <div class="track-tick tick-80" title="Checkpoint 80% (Crítico)"></div>
         </div>
 
-        <!-- Minimal Checkpoint Ruler (Monochromatic & aligned with ticks) -->
+        <!-- Minimal Checkpoint Ruler (Aligned directly under ticks) -->
         <div class="track-ruler">
-          <span id="mark-25" class="ruler-tick mark-25" title="Checkpoint 25%: Uso moderado">25%</span>
-          <span id="mark-55" class="ruler-tick mark-55" title="Checkpoint 55%: Chat pesado">55%</span>
-          <span id="mark-80" class="ruler-tick mark-80" title="Checkpoint 80%: Límite recomendado">80%</span>
+          <span id="mark-25" class="ruler-tick mark-25" title="Moderado a partir del 25%">
+            <span class="tick-dot moderate"></span>
+            <span>25%</span>
+          </span>
+          <span id="mark-55" class="ruler-tick mark-55" title="Pesado a partir del 55%">
+            <span class="tick-dot heavy"></span>
+            <span>55%</span>
+          </span>
+          <span id="mark-80" class="ruler-tick mark-80" title="Crítico / Límite a partir del 80%">
+            <span class="tick-dot critical"></span>
+            <span>80%</span>
+          </span>
         </div>
       </div>
 
