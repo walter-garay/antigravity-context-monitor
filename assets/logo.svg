@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#1e1e2e"/>
+  <!-- Gauge Arc Background -->
+  <path d="M 16 44 A 20 20 0 1 1 48 44" fill="none" stroke="#313244" stroke-width="5" stroke-linecap="round"/>
+  <!-- Gauge Arc Active (Gradient-like effect) -->
+  <path d="M 16 44 A 20 20 0 1 1 40 18" fill="none" stroke="#89b4fa" stroke-width="5" stroke-linecap="round"/>
+  <!-- Center Pivot -->
+  <circle cx="32" cy="34" r="3.5" fill="#cdd6f4"/>
+  <!-- Gauge Needle -->
+  <line x1="32" y1="34" x2="41" y2="24" stroke="#a6e3a1" stroke-width="3" stroke-linecap="round"/>
+  <!-- Digital Pulse bar at bottom -->
+  <rect x="22" y="47" width="20" height="4" rx="2" fill="#cba6f7"/>
+</svg>

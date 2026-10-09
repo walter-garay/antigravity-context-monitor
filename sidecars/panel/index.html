@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Context Monitor</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/preload.js"></script>
+</head>
+<body>
+  <div class="panel-container">
+    <!-- Header -->
+    <header class="panel-header">
+      <div class="header-title">
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 7v5l3 3"/>
+        </svg>
+        <h1>Context Monitor</h1>
+      </div>
+      <div class="header-actions">
+        <span id="live-indicator" class="live-pill active">En vivo</span>
+        <button id="btn-refresh" class="icon-btn" title="Actualizar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Gauge Card -->
+    <section class="card gauge-card">
+      <div class="gauge-header">
+        <span class="card-subtitle">Ventana de Contexto</span>
+        <span id="model-tag" class="model-badge">Gemini Flash</span>
+      </div>
+
+      <div class="token-display">
+        <span id="tokens-current" class="token-number">--</span>
+        <span class="token-separator">/</span>
+        <span id="tokens-max" class="token-max">--</span>
+        <span class="token-unit">tokens</span>
+      </div>
+
+      <!-- Visual Progress Bar -->
+      <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+      </div>
+
+      <div class="progress-labels">
+        <span id="percent-label" class="percent-text">0% utilizado</span>
+        <span id="tokens-remaining" class="remaining-text">-- disponibles</span>
+      </div>
+    </section>
+
+    <!-- Status & Recommendation Card -->
+    <section id="status-card" class="card status-card optimal">
+      <div class="status-header">
+        <span id="status-badge-dot" class="status-badge-dot"></span>
+        <h3 id="status-title">Calculando estado...</h3>
+      </div>
+      <p id="status-message" class="status-desc">Analizando el historial de la conversación...</p>
+      <div id="recommendation-box" class="recommendation-box">
+        <strong>💡 Recomendación:</strong>
+        <span id="recommendation-text">--</span>
+      </div>
+    </section>
+
+    <!-- Detailed Stats Grid -->
+    <section class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-label">Caché Leída</span>
+        <span id="stat-cache" class="stat-value">--</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Tokens Salida</span>
+        <span id="stat-output" class="stat-value">--</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Turnos / Pasos</span>
+        <span id="stat-turns" class="stat-value">--</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Herramientas</span>
+        <span id="stat-tools" class="stat-value">--</span>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <section class="actions-section">
+      <button id="btn-copy-summary" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        Copiar resumen de contexto
+      </button>
+      <button id="btn-new-chat" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Iniciar nuevo chat
+      </button>
+    </section>
+
+    <!-- Recent Activity Trail -->
+    <section class="card activity-card">
+      <h3 class="card-title">Última actividad del chat</h3>
+      <div id="events-list" class="events-list">
+        <div class="empty-events">Sin actividad reciente registrada</div>
+      </div>
+    </section>
+
+    <!-- Updater bar -->
+    <div class="update-card">
+      <div class="update-info">
+        <span id="version-tag" class="version-tag">v1.0.0</span>
+        <span id="update-msg" class="update-msg">Al día</span>
+      </div>
+      <div id="update-action-container">
+        <button id="btn-check-update" class="link-btn">Buscar actualización</button>
+      </div>
+    </div>
+
+    <!-- Footer info -->
+    <footer class="panel-footer">
+      <span id="last-sync">Actualizado hace un momento</span>
+      <span class="footer-convo-id" id="convo-id-display">ID: --</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>
