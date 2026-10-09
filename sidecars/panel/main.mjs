@@ -9,7 +9,7 @@ const PLUGIN_ROOT = join(HERE, '..', '..');
 const APP_DATA_DIR = process.env.ANTIGRAVITY_APP_DATA_DIR || join(homedir(), '.gemini', 'antigravity');
 const BRAIN_DIR = join(APP_DATA_DIR, 'brain');
 
-const CURRENT_VERSION = '1.0.0';
+const CURRENT_VERSION = '1.0.1';
 const GITHUB_REPO = 'walter-garay/antigravity-context-monitor';
 const RAW_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main`;
 
@@ -30,6 +30,101 @@ app.api('/api/status', () => ({
   appDataDir: APP_DATA_DIR,
   brainDirExists: existsSync(BRAIN_DIR),
 }), 'GET');
+
+// Generate Handover Summary for transferring context to a new chat
+function generateHandoverSummary(conversationId) {
+  if (!conversationId) {
+    return {
+      summary: 'No hay conversación activa seleccionada.',
+      hasData: false,
+    };
+  }
+
+  const convoDir = join(BRAIN_DIR, conversationId);
+  const transcriptPath = join(convoDir, '.system_generated', 'logs', 'transcript.jsonl');
+
+  if (!existsSync(transcriptPath)) {
+    return {
+      summary: 'Conversación nueva sin historial registrado aún.',
+      hasData: false,
+    };
+  }
+
+  try {
+    const rawContent = readFileSync(transcriptPath, 'utf8');
+    const lines = rawContent.split(/\r?\n/).filter(line => line.trim().length > 0);
+
+    const userRequests = [];
+    const filesTouched = new Set();
+
+    for (const line of lines) {
+      try {
+        const step = JSON.parse(line);
+        if (step.type === 'USER_INPUT' && step.content) {
+          const match = step.content.match(/<USER_REQUEST>([\s\S]*?)<\/USER_REQUEST>/);
+          const req = (match ? match[1] : step.content).trim();
+          if (req.length > 3) userRequests.push(req);
+        }
+        if (step.tool_calls && Array.isArray(step.tool_calls)) {
+          for (const tc of step.tool_calls) {
+            if (tc.args) {
+              let f = tc.args.TargetFile || tc.args.targetFile || tc.args.AbsolutePath || tc.args.path;
+              if (f && typeof f === 'string' && (tc.name.includes('file') || tc.name.includes('write'))) {
+                f = f.replace(/\\/g, '/').replace(/^"|"$/g, '');
+                if (!f.includes('.system_generated') && !f.endsWith('.log') && !f.includes('/builtin/')) {
+                  const filename = f.split('/').pop();
+                  if (filename && !filename.includes('transcript')) {
+                    filesTouched.add(filename);
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch {}
+    }
+
+    const initialGoal = userRequests[0] || 'Desarrollo del proyecto';
+    const latestGoal = userRequests[userRequests.length - 1] || 'Continuación de desarrollo';
+    const fileList = Array.from(filesTouched);
+
+    const historyItems = userRequests.slice(1, -1);
+    const historyText = historyItems.length > 0
+      ? historyItems.map((r, i) => `${i + 1}. ${r.length > 120 ? r.slice(0, 120) + '...' : r}`).join('\n')
+      : '- Sin pasos intermedios relevantes.';
+
+    const summaryMarkdown = `### 📋 RESUMEN DE CONTINUIDAD (TRANSFERENCIA DE CONTEXTO)
+
+**Objetivo Inicial:**
+${initialGoal}
+
+**Historial de Cambios / Requerimientos Realizados:**
+${historyText}
+
+**Archivos Principales Modificados:**
+${fileList.length > 0 ? fileList.map(f => `- \`${f}\``).join('\n') : '- Archivos del repositorio local.'}
+
+**Estado Actual y Tarea Pendiente:**
+${latestGoal}
+
+---
+**Instrucción para el nuevo chat:**
+Continuamos el trabajo desde este punto con el contexto limpio. Por favor toma este resumen como base y continúa con el estado actual sin repetir lo ya implementado.`;
+
+    return {
+      summary: summaryMarkdown,
+      initialGoal,
+      latestGoal,
+      filesTouched: fileList,
+      hasData: true,
+    };
+  } catch (err) {
+    return {
+      summary: `Error al generar resumen: ${err.message}`,
+      hasData: false,
+    };
+  }
+}
 
 // Context analysis handler
 function analyzeConversationContext(conversationId) {
@@ -216,6 +311,17 @@ app.api('/api/context', (data) => {
 app.api('/api/context', (data) => {
   const conversationId = data.conversationId || process.env.ANTIGRAVITY_CONVERSATION_ID;
   return analyzeConversationContext(conversationId);
+}, 'POST');
+
+// Handover summary endpoint
+app.api('/api/handover-summary', (data) => {
+  const conversationId = data.conversationId || process.env.ANTIGRAVITY_CONVERSATION_ID;
+  return generateHandoverSummary(conversationId);
+}, 'GET');
+
+app.api('/api/handover-summary', (data) => {
+  const conversationId = data.conversationId || process.env.ANTIGRAVITY_CONVERSATION_ID;
+  return generateHandoverSummary(conversationId);
 }, 'POST');
 
 // Check update endpoint

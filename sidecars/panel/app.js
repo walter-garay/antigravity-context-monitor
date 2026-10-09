@@ -5,6 +5,7 @@ const $ = (id) => document.getElementById(id);
 
 let pollInterval = null;
 let lastData = null;
+let lastHandoverSummary = '';
 
 function formatNumber(num) {
   if (num === null || num === undefined || isNaN(num)) return '0';
@@ -22,10 +23,9 @@ function toast(message, isError = false) {
   toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
 }
 
-// Copy to clipboard with robust iframe fallback
+// Copy to clipboard with robust textarea fallback for iframes
 function copyToClipboard(text) {
   return new Promise((resolve, reject) => {
-    // Method 1: document.execCommand with temporary textarea
     try {
       const textArea = document.createElement('textarea');
       textArea.value = text;
@@ -44,17 +44,14 @@ function copyToClipboard(text) {
         resolve();
         return;
       }
-    } catch {
-      // Fall through to navigator.clipboard
-    }
+    } catch {}
 
-    // Method 2: navigator.clipboard
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(resolve).catch(reject);
       return;
     }
 
-    reject(new Error('Portapapeles no soportado en este entorno'));
+    reject(new Error('No se pudo copiar automáticamente'));
   });
 }
 
@@ -207,6 +204,16 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
+async function fetchHandoverSummary() {
+  const convoId = sidecar?.conversationId;
+  const res = await callApi('/api/handover-summary', {
+    method: 'POST',
+    body: { conversationId: convoId },
+  });
+  lastHandoverSummary = res.summary || '';
+  return lastHandoverSummary;
+}
+
 // ---------------------------------------------------------------------------
 // Event Listeners
 // ---------------------------------------------------------------------------
@@ -217,31 +224,49 @@ $('btn-refresh')?.addEventListener('click', () => {
   toast('Métricas actualizadas');
 });
 
-// Copy Summary Button (with iframe fallback)
+// Copy Handover Summary (Generates rich context for next chat)
 $('btn-copy-summary')?.addEventListener('click', async () => {
-  if (!lastData) {
-    toast('No hay datos disponibles para copiar', true);
-    return;
-  }
-  const summaryText = `[Resumen de Contexto - Antigravity]
-• Ventana de contexto: ${formatNumber(lastData.currentTokens)} / ${formatNumber(lastData.maxTokens)} tokens (${lastData.percentUsed}%)
-• Estado: ${lastData.statusLevel?.toUpperCase()}
-• Turnos: ${lastData.userPromptCount} usuario / ${lastData.modelTurnCount} agente
-• Diagnóstico: ${lastData.statusMessage}
-• Recomendación: ${lastData.recommendation}`;
-
+  toast('Generando resumen de continuidad...');
   try {
-    await copyToClipboard(summaryText);
-    toast('Copiado al portapapeles');
+    const summary = await fetchHandoverSummary();
+    const handoverText = $('handover-text');
+    if (handoverText) handoverText.value = summary;
+
+    await copyToClipboard(summary);
+    toast('¡Resumen de continuidad copiado!');
+
+    // Show preview modal
+    const modal = $('handover-modal');
+    if (modal) modal.style.display = 'flex';
   } catch (err) {
-    console.error('Error al copiar:', err);
+    console.error('Error:', err);
+    toast('Error al generar resumen', true);
+  }
+});
+
+// Modal close
+$('btn-close-modal')?.addEventListener('click', () => {
+  const modal = $('handover-modal');
+  if (modal) modal.style.display = 'none';
+});
+
+// Modal copy button
+$('btn-modal-copy')?.addEventListener('click', async () => {
+  const text = $('handover-text')?.value || lastHandoverSummary;
+  try {
+    await copyToClipboard(text);
+    toast('¡Copiado al portapapeles!');
+  } catch {
     toast('No se pudo copiar automáticamente', true);
   }
 });
 
-// Start New Chat Button
-$('btn-new-chat')?.addEventListener('click', async () => {
+// Launch new chat with handover summary
+async function launchNewChatWithSummary() {
   const btn = $('btn-new-chat');
+  const modal = $('handover-modal');
+  if (modal) modal.style.display = 'none';
+
   const originalHtml = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = `
@@ -252,17 +277,22 @@ $('btn-new-chat')?.addEventListener('click', async () => {
   `;
 
   try {
+    let summary = lastHandoverSummary;
+    if (!summary) {
+      summary = await fetchHandoverSummary();
+    }
+
     if (sidecar?.agent?.startConversation) {
-      const res = await sidecar.agent.startConversation('Iniciando una nueva sesión de trabajo con el contexto limpio.');
+      const res = await sidecar.agent.startConversation(summary, 'Continuación de Tarea');
       const newConvoId = res?.response?.conversationId || res?.conversation_id || res?.conversationId;
       
-      toast('Nuevo chat creado con éxito');
+      toast('Nuevo chat iniciado con todo el contexto transferido');
 
       if (newConvoId && sidecar?.ui?.toggleConversation) {
         sidecar.ui.toggleConversation(newConvoId);
       }
     } else {
-      toast('Crea un nuevo chat usando el botón "+" en la barra izquierda.');
+      toast('Crea un nuevo chat desde el botón "+" en la barra lateral.');
     }
   } catch (err) {
     console.error('Error al iniciar conversación:', err);
@@ -271,9 +301,12 @@ $('btn-new-chat')?.addEventListener('click', async () => {
     setTimeout(() => {
       btn.disabled = false;
       btn.innerHTML = originalHtml;
-    }, 1500);
+    }, 2000);
   }
-});
+}
+
+$('btn-new-chat')?.addEventListener('click', launchNewChatWithSummary);
+$('btn-modal-launch')?.addEventListener('click', launchNewChatWithSummary);
 
 // Update checker
 $('btn-check-update')?.addEventListener('click', async () => {
